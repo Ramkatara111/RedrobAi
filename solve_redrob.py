@@ -151,7 +151,6 @@ def normalize_token(raw_token):
     if not token:
         return None
 
-    # Match multi-word phrases before direct token lookup.
     for phrase in MULTI_WORD_ALIASES:
         if token == phrase:
             return SKILL_ALIASES[phrase]
@@ -166,7 +165,6 @@ def normalize_skills(raw_skills):
         if mapped is not None:
             canonical.append(mapped)
 
-    # Deduplicate while preserving first appearance order.
     deduped = []
     seen = set()
     for skill in canonical:
@@ -227,20 +225,16 @@ def rank_top3(jd_vector, resume_vectors):
 
 
 def verify_pipeline(normalized_resumes, vocabulary, idf, resume_vectors):
-    # Corpus rules from prompt.
     assert len(normalized_resumes) == 10, "Expected exactly 10 resumes."
     assert vocabulary == sorted(vocabulary), "Vocabulary must be alphabetically sorted."
 
-    # Deduplication rule: no canonical skill appears more than once per resume.
     for name, skills in normalized_resumes:
         assert len(skills) == len(set(skills)), f"Duplicate skills found after dedupe: {name}"
         assert skills, f"Resume has zero recognized skills after normalization: {name}"
 
-    # IDF should use natural log and no smoothing; all values are non-negative when df <= N.
     for skill, idf_value in idf.items():
         assert idf_value >= 0.0, f"Unexpected negative IDF for skill: {skill}"
 
-    # Vector dimension consistency.
     dim = len(vocabulary)
     for name, vec in resume_vectors.items():
         assert len(vec) == dim, f"Vector length mismatch for resume: {name}"
@@ -260,7 +254,8 @@ def parse_args():
         action="store_true",
         help="Run pipeline validation assertions before printing final output.",
     )
-    return parser.parse_args()
+    args, _ = parser.parse_known_args()  # ignore Jupyter's kernel args
+    return args
 
 
 def main():
