@@ -1,1 +1,78 @@
+# Redrob Hackathon - Resume Matching Engine
 
+This project solves the **Redrob AI Campus Hackathon** problem:
+
+- Normalize noisy resume skills
+- Build a shared vocabulary from resumes
+- Compute resume TF-IDF vectors
+- Build JD binary vectors on the same vocabulary
+- Compute cosine similarity and output **Top 3 candidates per JD**
+
+The implementation uses **Python standard library only**.
+
+## Files
+
+- `solve_redrob.py` - Main solution script
+
+## Problem Rules Implemented
+
+- Uses the provided `SKILL_ALIASES` exactly (no modifications).
+- Lowercases and splits skill strings by commas.
+- Applies alias mapping and discards unknown tokens.
+- Deduplicates canonical skills per resume.
+- Builds vocabulary from normalized + deduplicated resume skills only, sorted alphabetically.
+- TF-IDF is computed for resumes only:
+  - `TF = count(skill in resume) / total_unique_skills(resume)` (after dedupe => `1/N`)
+  - `IDF = ln(10 / df(skill))` (natural log, no smoothing)
+- JDs use binary vectors (not TF-IDF).
+- Cosine similarity is used for ranking.
+- Top-3 ranking per JD:
+  - Sort by score descending
+  - Break ties alphabetically by candidate name
+  - Round score to 2 decimals in output
+
+## How To Run
+
+From this folder:
+
+```powershell
+python .\solve_redrob.py
+```
+
+## Useful Flags
+
+- Verify internal constraints:
+
+```powershell
+python .\solve_redrob.py --verify
+```
+
+- Print intermediate steps (normalized skills + vocabulary):
+
+```powershell
+python .\solve_redrob.py --verbose
+```
+
+- Do both:
+
+```powershell
+python .\solve_redrob.py --verify --verbose
+```
+
+## Output Format
+
+The script prints:
+
+```text
+JD-1 — Kakao (ML Engineer)
+Name(score), Name(score), Name(score)
+JD-2 — Naver (Backend Engineer)
+Name(score), Name(score), Name(score)
+JD-3 — Line (Frontend Engineer)
+Name(score), Name(score), Name(score)
+```
+
+## Notes
+
+- If `python` is not recognized on Windows, install Python and ensure it is added to PATH.
+- No third-party libraries are required.
